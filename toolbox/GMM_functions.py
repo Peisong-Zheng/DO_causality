@@ -286,6 +286,48 @@ def plot_weighted_average_curve(ds, label_var_name='class_label',dpi=100):
     return weighted_avg_curves
 
 
+
+
+
+def calculate_mean_abs_eofs_by_class(eofs_data, labels):
+    """
+    Calculate the mean of the absolute values of EOFs for each class and the overall mean across all classes.
+    Additionally, calculate the mean across all EOF axes for each class.
+
+    Parameters:
+    - eofs_data: np.ndarray, the EOF data points (assumed to be an array where each row is a data point).
+    - labels: np.ndarray, the class labels assigned to each data point.
+
+    Returns:
+    - mean_abs_eofs: Dictionary with class labels as keys and mean absolute EOFs as values.
+    - overall_mean_abs_eof: The mean of the mean absolute EOFs across all classes.
+    """
+    unique_labels = np.unique(labels)
+    mean_abs_eofs = {}
+    all_means = []
+
+    for label in unique_labels:
+        # Filter EOFs by class
+        class_eofs = eofs_data[labels == label]
+        # Calculate mean of absolute values for this class
+        mean_abs_value = np.mean(np.abs(class_eofs), axis=0)
+        mean_abs_eofs[label] = mean_abs_value
+        # Calculate mean across all EOF axes for this class
+        mean_over_all_axes = np.mean(mean_abs_value)
+        # Append to all_means for overall calculation
+        all_means.append(mean_over_all_axes)
+        # Print results for each class
+        print(f"Class {label}:")
+        print(f"    Mean abs(EOFs) per axis: {mean_abs_value}")
+        print(f"    Mean abs(EOFs) across all axes: {mean_over_all_axes}")
+
+    # Calculate the overall mean of means
+    overall_mean_abs_eof = np.mean(all_means)
+
+    return mean_abs_eofs, overall_mean_abs_eof
+
+
+
 ###########################################################################################
 # import matplotlib.pyplot as plt
 # import matplotlib.colors as mcolors
