@@ -212,6 +212,7 @@ def OneDModel(runlength=10000, bpss_reoccurence=1000, bpss_length=500, show_figu
                 plt.plot(time, Temps[idx, 0, 2, :], color='cyan', alpha=0.3)
                 plt.plot(time, Temps[idx, 0, 3, :], color='red', alpha=0.3)
                 plt.plot(time, Temps[idx, 0, 4, :], color='green', alpha=0.3)
+                plt.legend(['Box 1', 'Box 2', 'Box 3', 'Box 4'])
         plt.title('Temperatures of Boxes 1 to 4 Over Time')
         plt.xlabel('Time (years)')
         plt.ylabel('Temperature')
