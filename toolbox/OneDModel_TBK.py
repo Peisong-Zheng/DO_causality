@@ -1,4 +1,4 @@
-def OneDModel(runlength=10000, bpss_reoccurence=1000, bpss_length=500, show_figures=False):
+def OneDModel(runlength=10000, bpss_reoccurence=1000, bpss_length=500, wnoise_level = 0.005, show_figures=False):
     # ----------------------------------------------------------------------- #
     #   Very rough draft of 1D diffusion/advection model for testing          #
     #   Date: 14/10/2024            
@@ -51,7 +51,7 @@ def OneDModel(runlength=10000, bpss_reoccurence=1000, bpss_length=500, show_figu
         if i == 10:
             wnoise_level = 0
         else:
-            wnoise_level = 0.005  # total white noise level <======CAN CHANGE 
+            wnoise_level = wnoise_level  # total white noise level <======CAN CHANGE 
             # wnoise_level = 0.00005
 
         wnoise_sigma = np.array([1, 1, 1, 1, 1, 1]) * wnoise_level  # sets level of white noise in each latitude 
