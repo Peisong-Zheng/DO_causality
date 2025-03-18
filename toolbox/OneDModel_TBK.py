@@ -254,7 +254,7 @@
 
 
 
-def OneDModel(runlength=10000, bpss_reoccurence=1000, bpss_length=500, wnoise_level = 0.005, if_shift=False, extra_lag=0, show_figures=False):
+def OneDModel(runlength=10000, bpss_reoccurence=1000, bpss_length=500, wnoise_level = 0.005, if_shift=False, lag_multiplier=1, show_figures=False):
     # ----------------------------------------------------------------------- #
     #   Very rough draft of 1D diffusion/advection model for testing          #
     #   Date: 14/10/2024            
@@ -452,28 +452,36 @@ def OneDModel(runlength=10000, bpss_reoccurence=1000, bpss_length=500, wnoise_le
             plt.show()
     
     if if_shift:
-        num_sims, _, nboxes, nsteps = Temps.shape  # nboxes should be ny+2
-        # Define the baseline shift for each box
-        # Box 3 (index 3): baseline = 1; Box 2 (index 2): baseline = 2; Box 1 (index 1): baseline = 3.
-        for sim in range(num_sims):
-            for (box_index, baseline) in zip([3, 2, 1], [1, 2, 3]):
-                # Effective shift: positive means leftward shift, negative means rightward shift
-                effective_shift = baseline - extra_lag
-                shifted = np.empty(nsteps)
-                # If effective_shift is positive: right-shift (delay)
-                if effective_shift > 0:
-                    shifted[:effective_shift] = np.nan
-                    shifted[effective_shift:] = Temps[sim, 0, box_index, :nsteps - effective_shift]
-                # If effective_shift is negative: left-shift (advance)
-                elif effective_shift < 0:
-                    shift_amount = -effective_shift  # make positive
-                    shifted[:nsteps - shift_amount] = Temps[sim, 0, box_index, shift_amount:]
-                    shifted[nsteps - shift_amount:] = np.nan
-                else:
-                    # effective_shift == 0; do nothing
-                    shifted = Temps[sim, 0, box_index, :].copy()
-                Temps[sim, 0, box_index, :] = shifted
+        # check if lag_multiplier is an integer >0
+        if not isinstance(lag_multiplier, int) or lag_multiplier <= 0:
+            raise ValueError("lag_multiplier must be an integer greater than 0.")
+        else:
+            lag_multiplier = int(lag_multiplier)
+            num_sims, _, nboxes, nsteps = Temps.shape  # nboxes should be ny+2
+            # Define the baseline shift for each box
+            # Box 3 (index 3): baseline = 1; Box 2 (index 2): baseline = 2; Box 1 (index 1): baseline = 3.
+            for sim in range(num_sims):
+                for (box_index, baseline) in zip([2, 1, 0], [1, 2, 3]):
+                    
+                    effective_shift = baseline * lag_multiplier
+                    shifted = np.empty(nsteps)
+                    # If effective_shift is positive: right-shift (delay)
+                    if effective_shift > 0:
+                        shifted[:effective_shift] = np.nan
+                        shifted[effective_shift:] = Temps[sim, 0, box_index, :nsteps - effective_shift]
+                    # If effective_shift is negative: left-shift (advance)
+                    elif effective_shift < 0:
+                        shift_amount = -effective_shift  # make positive
+                        shifted[:nsteps - shift_amount] = Temps[sim, 0, box_index, shift_amount:]
+                        shifted[nsteps - shift_amount:] = np.nan
+                    else:
+                        # effective_shift == 0; do nothing
+                        shifted = Temps[sim, 0, box_index, :].copy()
+                    Temps[sim, 0, box_index, :] = shifted
 
+            Temps = Temps[..., 3*lag_multiplier:nsteps]
+            # Also crop your time vector accordingly if you need it for plotting
+            time = time[3*lag_multiplier:nsteps]
 
 
     # After the loop, stack results and plot Figures 2, 3, and 6
